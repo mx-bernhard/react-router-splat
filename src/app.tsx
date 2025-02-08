@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -6,33 +7,62 @@ import {
   useLocation,
   Outlet,
   useParams,
+  UNSAFE_RouteContext,
 } from "react-router";
 
 // Parent Komponente (nur als Container für Child)
 function RenderHookValues({ desc }: { desc: string }) {
-  const pathParentPathname = useResolvedPath(".", { relative: "path" });
-  const routeParentPathname = useResolvedPath(".", { relative: "route" });
+  const parentRoutePathname = useResolvedPath(".", { relative: "path" });
+  const routePathname = useResolvedPath(".", { relative: "route" });
   const params = useParams();
+  const routeContext = useContext(UNSAFE_RouteContext);
   const location = useLocation();
   return (
     <div style={{ border: "1px dashed black", padding: "8px", margin: "8px" }}>
       <h3>{"<RenderHookValues /> " + desc}</h3>
       <p>
-        <code>{"useParenthPathname('.', { relative: 'path' } ):"}</code>
+        <code>{"useResolvedPath('.', { relative: 'path' } ):"}</code>
         <code style={{ background: "lightgrey" }}>
-          {pathParentPathname.pathname}
+          {routePathname.pathname}
         </code>
       </p>
       <p>
-        <code>{"useParenthPathname('.', { relative: 'route' } ):"}</code>
+        <code>{"useResolvedPath('..', { relative: 'route' } ):"}</code>
         <code style={{ background: "lightgrey" }}>
-          {routeParentPathname.pathname}
+          {parentRoutePathname.pathname}
         </code>
       </p>
       <p>
         <code>{"useParms():"}</code>
         <code style={{ background: "lightgrey" }}>
           {JSON.stringify(params)}
+        </code>
+      </p>
+      <p>
+        <code>{"routeContext.matches:"}</code>
+        <code style={{ background: "lightgrey" }}>
+          {JSON.stringify(
+            (() => {
+              const matches4Stringify = routeContext.matches.map((match) => ({
+                ...match,
+                route: {
+                  path: match.route.path,
+                },
+              }));
+              return matches4Stringify;
+            })(),
+            undefined,
+            3
+          )
+            .split("\n")
+            .map((line, index) => (
+              <code
+                key={index}
+                style={{ display: "block", whiteSpace: "pre-wrap" }}
+              >
+                {line}
+              </code>
+            ))}
         </code>
       </p>
       <div style={{ border: "3px solid black", padding: "8px", margin: "8px" }}>
